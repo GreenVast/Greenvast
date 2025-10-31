@@ -32,6 +32,11 @@ GreenVast empowers farmers, investors, and buyers to connect, trade, and manage 
 
 ---
 
+##  Watch Our Pitch
+[![Pitch Deck](https://img.shields.io/badge/View%20Pitch%20Deck-Beautiful.ai-brightgreen?style=for-the-badge)](https://www.beautiful.ai/player/-Ocu_f2ruFbkFy_DfD3r)
+
+
+
 ## 2. Low-Literacy UX Principles
 - One screen = one job: Big buttons, large type, no dense lists.
 - Pictograms + words: Icons always paired with text in both languages.
