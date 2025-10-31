@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { LanguageProvider } from './src/context/LanguageContext';
 
 /* ===================== AUTHENTICATION ===================== */
 import Login from './src/authentication/Login';
@@ -17,6 +18,7 @@ import NetWorth from './src/Farmer/NetWorth';
 import Weather from './src/Farmer/Weather';
 import Outbreaks from './src/Farmer/Outbreaks';
 import Communities from './src/Farmer/Communities';
+import CommunityChat from './src/Farmer/CommunityChat';
 
 /* ===================== INVESTOR SCREENS ===================== */
 import InvestorHome from './src/investor/InvestorHome';
@@ -31,8 +33,9 @@ const Stack = createNativeStackNavigator();
 /* ===================== MAIN APP NAVIGATION ===================== */
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <LanguageProvider>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
         {/* AUTHENTICATION */}
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Signup" component={Signup} />
@@ -48,6 +51,7 @@ export default function App() {
         <Stack.Screen name="Weather" component={Weather} />
         <Stack.Screen name="Outbreaks" component={Outbreaks} />
         <Stack.Screen name="Communities" component={Communities} />
+        <Stack.Screen name="CommunityChat" component={CommunityChat} />
 
         {/* INVESTOR SECTION */}
         <Stack.Screen name="InvestorHome" component={InvestorHome} />
@@ -56,7 +60,8 @@ export default function App() {
         {/* BUYER SECTION */}
         <Stack.Screen name="BuyerHome" component={BuyerHome} />
         <Stack.Screen name="BuyerProfile" component={BuyerProfile} />
-      </Stack.Navigator>
-    </NavigationContainer>
+        </Stack.Navigator>
+      </NavigationContainer>
+    </LanguageProvider>
   );
 }

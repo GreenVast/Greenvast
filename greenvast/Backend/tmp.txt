@@ -6,12 +6,13 @@ import { OffersService } from './offers.service';
 import { ChatGateway } from './chat.gateway';
 import { RfqController } from './rfq.controller';
 import { RfqService } from './rfq.service';
-import { AuthModule } from '../auth/auth.module';
+import { AuthModule } from '../auth/auth.module';   // ← add this
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule],                              // ← add this
   providers: [ListingsService, OffersService, RfqService, ChatGateway],
   controllers: [ListingsController, OffersController, RfqController],
   exports: [ListingsService, OffersService, RfqService],
 })
 export class MarketplaceModule {}
+
