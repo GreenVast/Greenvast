@@ -37,7 +37,7 @@ GreenVast empowers farmers, investors, and buyers to connect, trade, and manage 
 - Pictograms + words: Icons always paired with text in both languages.
 - Simple numbers: Weekly prices in shillings, not confusing deltas.
 - Dual language always: English on top, Kiswahili just below.
-- Green traffic lights: Use clear signals like ✅ “Good to plant”.
+- Green traffic lights: Use clear signals like  “Good to plant”.
 - Three choices max: Never show more than three main actions per screen.
 
 ---
@@ -90,6 +90,12 @@ GreenVast empowers farmers, investors, and buyers to connect, trade, and manage 
   - kamis_ingest.py (data ingestion)
 - REST endpoints: `/predict/*`, `/train/price`
 - Docker-ready, can run standalone or via backend proxy
+
+  **Team:**
+- Rene Bosire – Data Scientist
+- Rita Mnavu – Fullstack Developer
+- Aisha Omar – Fullstack Developer
+- Salma Adam – Project Manager
 
 ---
 
