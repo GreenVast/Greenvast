@@ -1,106 +1,91 @@
-# GreenVast Backend
+# GreenVast
 
-GreenVast backend powers the low-literacy farmer experience (prices, advisory, communities, marketplace, loans, analytics) backed by NestJS + Prisma, with optional AI helpers served by a Python FastAPI sidecar.
+A mobile-first platform for smallholder farmers, investors, and buyers in Kenya. GreenVast is designed for low-literacy users, with a simple, green-themed interface, dual-language support (English + Kiswahili), and clear, actionable features for agriculture and market access.
 
-## Stack
+---
 
-- **Runtime:** Node.js 22 (NestJS 11) plus Python FastAPI microservice (`../python-ai`)
-- **Database:** PostgreSQL via Prisma ORM
-- **Cache/Jobs:** Redis + BullMQ, cron via `@nestjs/schedule`
-- **Auth:** Firebase phone auth (ID token validation via Firebase Admin)
-- **Messaging:** Socket.IO gateway for listing chat threads
-- **Storage:** S3/Supabase-compatible presigned uploads
-- **Integrations:** KAMIS commodity prices, OpenWeather One Call, external AI via `PYTHON_SVC_URL`
-- **Localization:** JSON bundles (EN/SW) served via `/v1/i18n/:locale`
+## Table of Contents
+1. Overview
+2. Low-Literacy UX Principles
+3. Features
+   - Farmer
+   - Investor
+   - Buyer
+4. Technologies Used
+   - Frontend
+   - Backend
+   - Python AI
+5. Project Structure
+6. Setup & Installation
+   - Frontend
+   - Backend
+   - Python AI
+7. API & Modules
+8. Example App Copy
+9. Micro-Flows
+10. License
 
-## Getting Started
+---
 
-```bash
-cp .env.example .env                     # update connection + API keys
-npm install
-npm run prisma:generate
-npm run prisma:migrate                   # first run: creates schema (interactive)
-npm run db:seed                          # optional demo data
-npm run start:dev                        # -> http://localhost:4000/api
-```
+## 1. Overview
+GreenVast empowers farmers, investors, and buyers to connect, trade, and manage agricultural activities with clarity and simplicity. The platform supports role-based access, community joining, market uploads, loan tracking, and more.
 
-Set `DATABASE_URL` to a PostgreSQL instance (Docker recommended) and `REDIS_*` for job queues. Firebase credentials are optional for local work (guard can fall back to a dev user).
+---
 
-## Core Modules & Endpoints
+## 2. Low-Literacy UX Principles
+- One screen = one job: Big buttons, large type, no dense lists.
+- Pictograms + words: Icons always paired with text in both languages.
+- Simple numbers: Weekly prices in shillings, not confusing deltas.
+- Dual language always: English on top, Kiswahili just below.
+- Green traffic lights: Use clear signals like ✅ “Good to plant”.
+- Three choices max: Never show more than three main actions per screen.
 
-- `GET /v1/health` - service heartbeat
-- **Users** `/v1/users/*` - profile sync, consent, export/delete
-- **Farms** `/v1/farms/*` - parcels, crops, livestock, inventory
-- **Prices** `/v1/prices`, `/v1/markets` - weekly medians from KAMIS cache
-- **Advisory** `/v1/advisory?farmId=` - weather-to-action summaries (EN/SW)
-- **Communities** `/v1/communities/*` - join/post/report crop+county rooms
-- **Marketplace** `/v1/listings`, `/v1/offers`, `/v1/rfq` - listings, offers, RFQs, chat via WS `/chat`
-- **Loans** `/v1/loans/*` - loan tracker + repayment ledger
-- **Net worth** `/v1/farmer/:id/networth` - consent-aware share link
-- **Storage** `/v1/storage/upload-url` - presigned S3 uploads
-- **Admin** `/v1/admin/*` - report queue, moderation, analytics snapshot
-- **Localization** `/v1/i18n/en|sw` - translation bundles for the app shell
-- **Prediction** `/v1/prediction/*` - proxy endpoints for Python AI (price, yield/crop, yield/livestock, train/price)
+---
 
-All authenticated routes expect `Authorization: Bearer <FirebaseIDToken>`; `/prediction/train/price` also requires role `ADMIN`.
+## 3. Features
 
-## Background Jobs
+### Farmer
+- Dashboard: Weather, outbreak alerts, quick actions (Market, Community, Profile)
+- Market: Upload and view produce, see prices
+- Loan Tracker: Track loans and repayments
+- Net Worth: View farm value (if consented)
+- Community: Join WhatsApp groups, see joined communities
 
-- `KamisService` cron (06:00 EAT) refreshes commodity medians
-- Advisory lookups cache OpenWeather forecasts into `WeatherDaily`/`Advisory`
-- BullMQ preconfigured for future async jobs (notifications, analytics)
+### Investor
+- Dashboard: View open farmers, track farm value, offer funding/loans
+- Profile: Investment history, logout
 
-## Database Notes
+### Buyer
+- Dashboard: View products, profile
 
-See `prisma/schema.prisma` for full relations (users, farms, parcels, livestock, inventory, communities, marketplace, RFQs, advisories, yield history, price snapshots, etc.).
+---
 
-`npm run db:seed` seeds:
+## 4. Technologies Used
 
-- Six staple crops � five counties communities
-- Eight major markets with sample KAMIS-style price snapshots (median/min/max/avg)
-- Demo farmer (`firebaseUid=demo-farmer`) with parcels, dairy herd, inventory, and yield history rows (crop + milk)
+### Frontend
+- React Native (Expo)
+- TypeScript
+- Zustand (state management)
+- React Navigation
+- i18next (internationalization)
+- @expo/vector-icons
+- WhatsApp deep linking
 
-## Testing & Tooling
+### Backend
+- Node.js (NestJS)
+- Prisma ORM (PostgreSQL)
+- Redis + BullMQ (jobs, cache)
+- Firebase Auth (phone-based)
+- Socket.IO (chat)
+- S3/Supabase-compatible storage
+- KAMIS price feed, OpenWeather integration
+- RESTful API endpoints for all modules
 
-- `npm run build`
-- `npm test` (unit specs, including mocked prediction controller)
-- `npm run test:e2e`
-- Swagger at `/api/docs`
-
-## AI Microservice (`../python-ai`)
-
-```bash
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app:app --host 0.0.0.0 --port 8000
-pytest
-```
-
-Exposes:
-- `GET /health`
-- `POST /train/price`
-- `POST /predict/price`
-- `POST /predict/yield/crop`
-- `POST /predict/yield/livestock`
-- `POST /advisory`
-
-Responses include `modelVersion` for traceability.
-
-## Docker Compose (dev)
-
-```bash
-PYTHON_SVC_URL=http://python-ai:8000 docker-compose up --build
-```
-
-Brings up Postgres, Redis, NestJS (port 4000), and python-ai (port 8000) with live code mounts for local iteration.
-
-## Debug Headers
-
-During development you can impersonate users via:
-
-```
--H "x-debug-uid: farmer-1"
-```
-
-The same header can be used to exercise prediction routes before the mobile app is wired up.
+### Python AI
+- Python 3.10+ (FastAPI)
+- Trained modules:
+  - price_model.py (commodity price prediction)
+  - yield_model.py (crop/livestock yield prediction)
+  - advisory.py (weather-driven advisory)
+  - kamis_ingest.py (data ingestion)
+- REST endpoints: `/predict/*`, `/train/price`
