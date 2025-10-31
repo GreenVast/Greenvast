@@ -1,0 +1,17 @@
+{
+  "prices": {
+    "title": "{{crop}} — bei ya wiki",
+    "market": "Soko: {{market}} • Imeboreshwa: {{weekday}}"
+  },
+  "advisory": {
+    "good_to_plant": "Ni vizuri kupanda siku 3 zijazo.",
+    "delay_weeding": "Chelewesha kupalilia hadi udongo ukauke.",
+    "harvest_window": "Dirisha bora la kuvuna linaanza {{weekday}}.",
+    "keep_watching": "Endelea kufuatilia shamba. Hakuna tahadhari kubwa."
+  },
+  "loan": {
+    "total": "Jumla",
+    "paid": "Yalipwa",
+    "balance": "Salio"
+  }
+}

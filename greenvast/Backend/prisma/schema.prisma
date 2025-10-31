@@ -1,0 +1,474 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  FARMER
+  BUYER
+  INVESTOR
+  ADMIN
+}
+
+enum ListingStatus {
+  ACTIVE
+  PENDING
+  CLOSED
+  ARCHIVED
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  WITHDRAWN
+}
+
+enum LoanStatus {
+  ACTIVE
+  CLOSED
+  DEFAULTED
+}
+
+enum AdvisoryAction {
+  PLANT
+  WEED
+  HARVEST
+  WATCH
+  NONE
+}
+
+model User {
+  id            String     @id @default(uuid())
+  firebaseUid   String     @unique
+  role          UserRole
+  phoneNumber   String?    @unique
+  email         String?    @unique
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  lastLoginAt   DateTime?
+  profile       Profile?
+  farms         Farm[]
+  listings      Listing[]  @relation("ListingOwner")
+  offers        Offer[]    @relation("OfferBuyer")
+  messages      Message[]  @relation("MessageSender")
+  communities   CommunityMember[]
+  posts         Post[]
+  reports       Report[]
+  loans         Loan[]
+  consents      Consent?
+  netWorth      NetWorthRecord[]
+  rfqs          RequestForQuote[]
+  responses     MarketResponse[]
+  chats         ChatParticipant[]
+  systemRole    Boolean    @default(false)
+  consentLogs   ConsentLog[]
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  name        String
+  language    String   @default("en")
+  county      String?
+  subCounty   String?
+  location    Json?
+  avatarUrl   String?
+  bio         String?
+  crops       String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Consent {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  dataSharing   Boolean  @default(false)
+  analytics     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id])
+}
+
+model Farm {
+  id             String          @id @default(uuid())
+  userId         String
+  name           String
+  county         String?
+  subCounty      String?
+  sizeAcres      Decimal?        @db.Decimal(10, 2)
+  coordinates    Json?
+  notes          String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  owner          User            @relation(fields: [userId], references: [id])
+  parcels        Parcel[]
+  crops          CropPlan[]
+  livestock      Livestock[]
+  inventoryLots  InventoryLot[]
+  listings       Listing[]
+  advisories     Advisory[]
+  weatherHistory WeatherDaily[]
+  yieldHistory  YieldHistory[] @relation(name: "FarmYieldHistory")
+  rfqs           RequestForQuote[]
+}
+
+model Parcel {
+  id          String   @id @default(uuid())
+  farmId      String
+  name        String
+  areaAcres   Decimal? @db.Decimal(10, 2)
+  lat         Float?
+  lng         Float?
+  cropType    String?
+  soilType    String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  farm        Farm     @relation(fields: [farmId], references: [id])
+  crops       CropPlan[]
+  yieldHistory YieldHistory[] @relation(name: "ParcelYieldHistory")
+}
+
+model CropPlan {
+  id             String   @id @default(uuid())
+  farmId         String
+  parcelId       String?
+  crop           String
+  variety        String?
+  plantingDate   DateTime?
+  expectedYield  Decimal? @db.Decimal(12, 2)
+  yieldUnit      String?  @default("kg")
+  status         String?  @default("planned")
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  farm           Farm     @relation(fields: [farmId], references: [id])
+  parcel         Parcel?  @relation(fields: [parcelId], references: [id])
+}
+
+model Livestock {
+  id          String   @id @default(uuid())
+  farmId      String
+  type        String
+  count       Int      @default(0)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  farm        Farm     @relation(fields: [farmId], references: [id])
+}
+
+model InventoryLot {
+  id            String   @id @default(uuid())
+  farmId        String
+  crop          String
+  grade         String?
+  quantity      Decimal  @db.Decimal(12, 2)
+  unit          String   @default("kg")
+  pricePerUnit  Decimal? @db.Decimal(12, 2)
+  harvestDate   DateTime?
+  storageAt     String?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  farm          Farm     @relation(fields: [farmId], references: [id])
+}
+
+model Listing {
+  id             String         @id @default(uuid())
+  farmId         String?
+  ownerId        String
+  crop           String
+  grade          String?
+  quantity       Decimal        @db.Decimal(12, 2)
+  unit           String         @default("kg")
+  pricePerUnit   Decimal?       @db.Decimal(12, 2)
+  currency       String         @default("KES")
+  openToOffers   Boolean        @default(false)
+  description    String?
+  status         ListingStatus  @default(ACTIVE)
+  media          Json?
+  harvestDate    DateTime?
+  availableFrom  DateTime?
+  availableTo    DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  owner          User           @relation("ListingOwner", fields: [ownerId], references: [id])
+  farm           Farm?          @relation(fields: [farmId], references: [id])
+  offers         Offer[]
+  chats          ChatRoom[]
+  rfqs           RequestForQuoteListing[]
+}
+
+model Offer {
+  id             String      @id @default(uuid())
+  listingId      String
+  buyerId        String
+  pricePerUnit   Decimal?    @db.Decimal(12, 2)
+  quantity       Decimal     @db.Decimal(12, 2)
+  status         OfferStatus @default(PENDING)
+  message        String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  listing        Listing     @relation(fields: [listingId], references: [id])
+  buyer          User        @relation("OfferBuyer", fields: [buyerId], references: [id])
+}
+
+model ChatRoom {
+  id          String             @id @default(uuid())
+  listingId   String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  listing     Listing?           @relation(fields: [listingId], references: [id])
+  messages    Message[]
+  participants ChatParticipant[]
+}
+
+model ChatParticipant {
+  id        String   @id @default(uuid())
+  chatId    String
+  userId    String
+  joinedAt  DateTime @default(now())
+  chat      ChatRoom @relation(fields: [chatId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([chatId, userId])
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  chatId     String
+  senderId   String
+  content    String
+  media      Json?
+  createdAt  DateTime @default(now())
+  chat       ChatRoom @relation(fields: [chatId], references: [id])
+  sender     User     @relation("MessageSender", fields: [senderId], references: [id])
+}
+
+model Community {
+  id          String             @id @default(uuid())
+  crop        String
+  county      String
+  name        String
+  description String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  members     CommunityMember[]
+  posts       Post[]
+
+  @@index([crop, county], map: "Community_crop_county_idx")
+  @@unique([crop, county], map: "Community_crop_county_key")
+}
+
+model CommunityMember {
+  id           String     @id @default(uuid())
+  communityId  String
+  userId       String
+  role         String     @default("member")
+  joinedAt     DateTime   @default(now())
+  community    Community  @relation(fields: [communityId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+
+  @@unique([communityId, userId])
+}
+
+model Post {
+  id            String    @id @default(uuid())
+  communityId   String
+  userId        String
+  content       String
+  media         Json?
+  pinned        Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  community     Community @relation(fields: [communityId], references: [id])
+  author        User      @relation(fields: [userId], references: [id])
+  reports       Report[]
+}
+
+model Report {
+  id         String   @id @default(uuid())
+  postId     String
+  reporterId String
+  reason     String
+  createdAt  DateTime @default(now())
+  post       Post     @relation(fields: [postId], references: [id])
+  reporter   User     @relation(fields: [reporterId], references: [id])
+}
+
+model Loan {
+  id           String     @id @default(uuid())
+  userId       String
+  principal    Decimal    @db.Decimal(12, 2)
+  lender       String
+  interestRate Decimal?   @db.Decimal(5, 2)
+  startDate    DateTime
+  termMonths   Int
+  notes        String?
+  status       LoanStatus @default(ACTIVE)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  borrower     User       @relation(fields: [userId], references: [id])
+  repayments   Repayment[]
+}
+
+model Repayment {
+  id        String   @id @default(uuid())
+  loanId    String
+  amount    Decimal  @db.Decimal(12, 2)
+  paidAt    DateTime
+  method    String?
+  notes     String?
+  createdAt DateTime @default(now())
+  loan      Loan     @relation(fields: [loanId], references: [id])
+}
+
+model Market {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  county    String
+  latitude  Float?
+  longitude Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  prices    PriceSnapshot[]
+}
+
+model PriceSnapshot {
+  id          String   @id @default(uuid())
+  commodity   String
+  marketId    String
+  date        DateTime
+  medianPrice Decimal  @db.Decimal(12, 2)
+  unit        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  market      Market   @relation(fields: [marketId], references: [id])
+
+  @@index([commodity, marketId, date], map: "PriceSnapshot_commodity_market_date_idx")
+  @@unique([commodity, marketId, date], map: "PriceSnapshot_commodity_market_date_key")
+}
+
+model WeatherDaily {
+  id        String   @id @default(uuid())
+  farmId    String
+  date      DateTime
+  rainMm    Decimal? @db.Decimal(6, 2)
+  tempMax   Decimal? @db.Decimal(5, 2)
+  tempMin   Decimal? @db.Decimal(5, 2)
+  pop       Int?
+  createdAt DateTime @default(now())
+  farm      Farm     @relation(fields: [farmId], references: [id])
+
+  @@index([farmId, date], map: "WeatherDaily_farmId_date_idx")
+  @@unique([farmId, date], map: "WeatherDaily_farmId_date_key")
+}
+
+model YieldHistory {
+  id        String   @id @default(uuid())
+  farmId    String
+  parcelId  String?
+  type      String
+  crop      String?
+  season    String?
+  quantity  Decimal  @db.Decimal(12, 2)
+  unit      String
+  date      DateTime
+  createdAt DateTime @default(now())
+  farm      Farm     @relation(name: "FarmYieldHistory", fields: [farmId], references: [id])
+  parcel    Parcel?  @relation(name: "ParcelYieldHistory", fields: [parcelId], references: [id])
+
+  @@index([farmId, date], map: "YieldHistory_farmId_date_idx")
+  @@unique([farmId, date], map: "YieldHistory_farmId_date_key")
+}
+
+model Advisory {
+  id        String         @id @default(uuid())
+  farmId    String
+  date      DateTime
+  action    AdvisoryAction
+  textEn    String
+  textSw    String
+  icon      String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  farm      Farm            @relation(fields: [farmId], references: [id])
+
+  @@unique([farmId, date], map: "Advisory_farmId_date_key")
+}
+
+model NetWorthRecord {
+  id          String   @id @default(uuid())
+  userId      String
+  low         Decimal  @db.Decimal(14, 2)
+  mid         Decimal  @db.Decimal(14, 2)
+  high        Decimal  @db.Decimal(14, 2)
+  components  Json
+  computedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model ConsentLog {
+  id        String   @id @default(uuid())
+  userId    String
+  event     String
+  payload   Json?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model IntegrationLog {
+  id        String   @id @default(uuid())
+  source    String
+  level     String   @default("info")
+  message   String
+  meta      Json?
+  createdAt DateTime @default(now())
+}
+
+model RequestForQuote {
+  id           String   @id @default(uuid())
+  farmId       String?
+  userId       String
+  crop         String
+  grade        String?
+  quantity     Decimal  @db.Decimal(12, 2)
+  unit         String   @default("kg")
+  county       String?
+  status       String   @default("open")
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  farmer       User     @relation(fields: [userId], references: [id])
+  farm         Farm?    @relation(fields: [farmId], references: [id])
+  listings     RequestForQuoteListing[]
+  responses    MarketResponse[]
+}
+
+model RequestForQuoteListing {
+  id       String          @id @default(uuid())
+  rfqId    String
+  listingId String
+  rfq      RequestForQuote @relation(fields: [rfqId], references: [id])
+  listing  Listing         @relation(fields: [listingId], references: [id])
+
+  @@unique([rfqId, listingId])
+}
+
+model MarketResponse {
+  id        String   @id @default(uuid())
+  rfqId     String
+  userId    String
+  message   String
+  createdAt DateTime @default(now())
+  rfq       RequestForQuote @relation(fields: [rfqId], references: [id])
+  responder User            @relation(fields: [userId], references: [id])
+}
+

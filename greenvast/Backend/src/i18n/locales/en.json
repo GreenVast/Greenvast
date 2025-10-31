@@ -1,0 +1,17 @@
+{
+  "prices": {
+    "title": "{{crop}} — price of the week",
+    "market": "Market: {{market}} • Updated: {{weekday}}"
+  },
+  "advisory": {
+    "good_to_plant": "Good to plant next 3 days.",
+    "delay_weeding": "Delay weeding until soil drains.",
+    "harvest_window": "Best harvest window starts {{weekday}}.",
+    "keep_watching": "Keep monitoring fields. No major weather alerts."
+  },
+  "loan": {
+    "total": "Total",
+    "paid": "Paid",
+    "balance": "Balance"
+  }
+}
