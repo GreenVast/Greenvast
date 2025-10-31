@@ -1,0 +1,15 @@
+{
+  "prices": {
+    "title": "{crop} — bei ya wiki",
+    "subtext_market": "Soko: {market} • Imewekwa: {weekday}"
+  },
+  "advisory": {
+    "good_to_plant": "Ni vizuri kupanda siku 3 zijazo.",
+    "wait_for_dry": "Subiri siku kavu."
+  },
+  "loan": {
+    "total": "Mkopo jumla",
+    "paid": "Uliolipwa",
+    "balance": "Salio"
+  }
+}

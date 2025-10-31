@@ -1,0 +1,15 @@
+{
+  "prices": {
+    "title": "{crop} — price of the week",
+    "subtext_market": "Market: {market} • Updated: {weekday}"
+  },
+  "advisory": {
+    "good_to_plant": "Good to plant next 3 days.",
+    "wait_for_dry": "Wait for a dry day."
+  },
+  "loan": {
+    "total": "Total loan",
+    "paid": "Paid",
+    "balance": "Balance"
+  }
+}
