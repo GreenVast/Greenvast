@@ -1,55 +1,75 @@
 import React, { useState } from 'react';
 import {
-  View,
+  Alert,
+  Linking,
+  Modal,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  ScrollView,
-  Linking,
-  StyleSheet,
-  Modal,
-  Alert,
-  Pressable,
-  Platform,
-  SafeAreaView,
+  View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useFarmerStore } from '../store/useFarmerStore';
+import { useLanguage } from '../context/LanguageContext';
+
+const suggestedCommunities = [
+  'Local Farmers',
+  'Crop Exchange',
+  'Dairy Group',
+  'Avocado Growers',
+];
 
 export default function FarmerHome() {
   const navigation = useNavigation<any>();
   const { farmer } = useFarmerStore();
-  const [joinModalVisible, setJoinModalVisible] = useState(false);
+  const { t, language, toggleLanguage } = useLanguage();
 
-  const communities = ['Local Farmers', 'Crop Exchange', 'Dairy Group', 'Avocado Growers'];
+  const [joinModalVisible, setJoinModalVisible] = useState(false);
 
   const handleCallSupport = () => {
     Linking.openURL('tel:+254740682018');
   };
 
+  const handleJoinCommunity = (name: string) => {
+    Alert.alert('Joined', `${name} community added to your list.`);
+    setJoinModalVisible(false);
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.screen}>
-        {/* 🌿 HEADER */}
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>
-              Hello, {farmer?.name || 'Farmer'}
+              {t('farmer.greeting', { name: farmer?.name || 'Farmer' })}
             </Text>
             <Text style={styles.headerSubtitle}>
-              {farmer?.farmingType || '—'} • {farmer?.county || '—'}
+              {t('farmer.location', {
+                type: farmer?.farmingType || '—',
+                county: farmer?.county || '—',
+              })}
             </Text>
           </View>
-
-          <TouchableOpacity
-            onPress={() => navigation.navigate('FarmerProfile')}
-            style={styles.profileButton}
-          >
-            <Ionicons name="person" size={26} color="#2E7D32" />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.languageToggle} onPress={toggleLanguage}>
+              <Text style={styles.languageToggleText}>
+                {language === 'en' ? 'SW' : 'EN'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('FarmerProfile')}
+              style={styles.profileButton}
+            >
+              <Ionicons name="person" size={26} color="#2E7D32" />
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* 🌦 MAIN CONTENT */}
         <ScrollView
           contentContainerStyle={{
             paddingHorizontal: 18,
@@ -57,63 +77,42 @@ export default function FarmerHome() {
           }}
           showsVerticalScrollIndicator={false}
         >
-          {/* Weather Section */}
-          <Text style={styles.sectionTitle}>Farming Insights</Text>
+          <Text style={styles.sectionTitle}>{t('farmer.farmingInsights')}</Text>
 
           <View style={styles.cardContainer}>
-            {/* Weather Card */}
             <Pressable
-              style={({ pressed }) => [
-                styles.card,
-                pressed && styles.cardPressed,
-              ]}
-              onPress={() => {
-                try {
-                  navigation.navigate('Weather');
-                } catch {}
-              }}
+              style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+              onPress={() => navigation.navigate('Weather')}
             >
               <Ionicons name="cloud-outline" size={36} color="#2E7D32" />
               <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={styles.cardTitle}>Weather Forecast</Text>
-                <Text style={styles.cardText}>Good to plant next 3 days</Text>
-                <Text style={styles.cardSmall}>
-                  Light showers expected, Avg temp 24°C
-                </Text>
+                <Text style={styles.cardTitle}>{t('farmer.weatherTitle')}</Text>
+                <Text style={styles.cardText}>{t('farmer.weatherSubtitle')}</Text>
+                <Text style={styles.cardSmall}>{t('farmer.weatherDetail')}</Text>
               </View>
             </Pressable>
 
-            {/* Outbreak Card */}
             <Pressable
               style={({ pressed }) => [
                 styles.card,
                 styles.alertCard,
                 pressed && styles.cardPressed,
               ]}
-              onPress={() => {
-                try {
-                  navigation.navigate('Outbreaks');
-                } catch {}
-              }}
+              onPress={() => navigation.navigate('Outbreaks')}
             >
-              <Ionicons
-                name="alert-circle-outline"
-                size={36}
-                color="#C62828"
-              />
+              <Ionicons name="alert-circle-outline" size={36} color="#C62828" />
               <View style={{ flex: 1, marginLeft: 12 }}>
                 <Text style={[styles.cardTitle, { color: '#C62828' }]}>
-                  Outbreak Alerts
+                  {t('farmer.outbreakTitle')}
                 </Text>
-                <Text style={styles.cardText}>No current alerts</Text>
-                <Text style={styles.cardSmall}>Last checked: Today</Text>
+                <Text style={styles.cardText}>{t('farmer.outbreakSubtitle')}</Text>
+                <Text style={styles.cardSmall}>{t('farmer.outbreakDetail')}</Text>
               </View>
             </Pressable>
           </View>
 
-          {/* 🚜 Quick Actions */}
           <Text style={[styles.sectionTitle, { marginTop: 30 }]}>
-            Quick Actions
+            {t('farmer.quickActions')}
           </Text>
 
           <View style={styles.actionsGrid}>
@@ -122,176 +121,183 @@ export default function FarmerHome() {
               onPress={() => navigation.navigate('Market')}
             >
               <Ionicons name="cart" size={34} color="#2E7D32" />
-              <Text style={styles.actionLabel}>Market</Text>
+              <Text style={styles.actionLabel}>{t('farmer.market')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => setJoinModalVisible(true)}
+              onPress={() => navigation.navigate('LoanTracker')}
             >
-              <Ionicons name="people" size={34} color="#2E7D32" />
-              <Text style={styles.actionLabel}>Community</Text>
+              <Ionicons name="cash" size={34} color="#2E7D32" />
+              <Text style={styles.actionLabel}>{t('farmer.loanTracker')}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('NetWorth')}
+            >
+              <Ionicons name="bar-chart" size={34} color="#2E7D32" />
+              <Text style={styles.actionLabel}>{t('farmer.netWorth')}</Text>
             </TouchableOpacity>
           </View>
+
+          <View style={styles.actionsGrid}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('Prices')}
+            >
+              <Ionicons name="pricetags" size={34} color="#2E7D32" />
+              <Text style={styles.actionLabel}>{t('farmer.market')}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('UploadProduct')}
+            >
+              <Ionicons name="cloud-upload" size={34} color="#2E7D32" />
+              <Text style={styles.actionLabel}>Upload</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('Communities')}
+            >
+              <Ionicons name="chatbubbles" size={34} color="#2E7D32" />
+              <Text style={styles.actionLabel}>{t('farmer.communities')}</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            style={styles.communityBanner}
+            onPress={() => setJoinModalVisible(true)}
+          >
+            <Ionicons name="people" size={30} color="#FFFFFF" />
+            <View style={{ marginLeft: 12, flex: 1 }}>
+              <Text style={styles.communityTitle}>{t('farmer.communities')}</Text>
+              <Text style={styles.communitySubtitle}>
+                Join conversations nearby and share updates instantly.
+              </Text>
+            </View>
+            <Ionicons name="add" size={26} color="#FFFFFF" />
+          </TouchableOpacity>
         </ScrollView>
 
-        {/* 💬 Help Bar + Floating Button */}
         <View style={styles.bottomContainer}>
-          {/* Help Bar */}
-          <TouchableOpacity style={styles.helpBar}>
-            <Ionicons name="help-circle-outline" size={20} color="#2E7D32" />
-            <Text style={styles.helpText}>Need Help? Chat with Support</Text>
-          </TouchableOpacity>
-
-          {/* Floating call button */}
-          <TouchableOpacity onPress={handleCallSupport} style={styles.fab}>
-            <Ionicons name="call" size={24} color="white" />
+          <TouchableOpacity style={styles.helpBar} onPress={handleCallSupport}>
+            <Ionicons name="call" size={20} color="#2E7D32" />
+            <Text style={styles.helpText}>Call support</Text>
           </TouchableOpacity>
         </View>
-
-        {/* 🌾 Join Community Modal */}
-        <Modal visible={joinModalVisible} transparent animationType="slide">
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>Join a Community</Text>
-
-              {communities.map((c) => (
-                <TouchableOpacity
-                  key={c}
-                  style={styles.communityRow}
-                  onPress={() => {
-                    setJoinModalVisible(false);
-                    Alert.alert('Joined', `You joined ${c}`);
-                  }}
-                >
-                  <Text style={styles.communityText}>{c}</Text>
-                  <Ionicons
-                    name="add-circle-outline"
-                    size={22}
-                    color="#2E7D32"
-                  />
-                </TouchableOpacity>
-              ))}
-
-              <TouchableOpacity
-                style={styles.modalCancel}
-                onPress={() => setJoinModalVisible(false)}
-              >
-                <Text style={styles.cancelText}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
       </View>
+
+      <Modal visible={joinModalVisible} transparent animationType="fade">
+        <Pressable style={styles.modalOverlay} onPress={() => setJoinModalVisible(false)}>
+          <Pressable style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Suggested communities</Text>
+            {suggestedCommunities.map((name) => (
+              <View key={name} style={styles.communityRow}>
+                <Text style={styles.communityText}>{name}</Text>
+                <TouchableOpacity onPress={() => handleJoinCommunity(name)}>
+                  <Ionicons name="add-circle-outline" size={24} color="#2E7D32" />
+                </TouchableOpacity>
+              </View>
+            ))}
+            <TouchableOpacity style={styles.modalCancel} onPress={() => setJoinModalVisible(false)}>
+              <Text style={styles.cancelText}>Close</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#E8F5E9',
-  },
-  screen: {
-    flex: 1,
-    backgroundColor: '#E8F5E9',
-  },
-
-  // HEADER
+  safeArea: { flex: 1, backgroundColor: '#E8F5E9' },
+  screen: { flex: 1 },
   header: {
     backgroundColor: '#2E7D32',
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 25,
+    paddingBottom: 20,
     paddingHorizontal: 20,
-    borderBottomLeftRadius: 25,
-    borderBottomRightRadius: 25,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    elevation: 6,
   },
-  headerTitle: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: '800',
-  },
-  headerSubtitle: {
-    color: '#E8F5E9',
-    fontSize: 14,
-    marginTop: 4,
-  },
-  profileButton: {
-    backgroundColor: 'white',
-    padding: 8,
-    borderRadius: 50,
+  headerTitle: { color: '#FFFFFF', fontSize: 22, fontWeight: '700' },
+  headerSubtitle: { color: '#C8E6C9', fontSize: 14, marginTop: 4 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  languageToggle: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 999,
     elevation: 2,
   },
-
-  // MAIN SECTIONS
+  languageToggleText: { color: '#2E7D32', fontWeight: '700', fontSize: 12 },
+  profileButton: {
+    backgroundColor: '#FFFFFF',
+    padding: 8,
+    borderRadius: 999,
+    elevation: 3,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#2E7D32',
-    marginTop: 20,
-    marginBottom: 10,
+    marginTop: 24,
+    marginBottom: 16,
   },
   cardContainer: {
-    gap: 12,
+    flexDirection: 'row',
+    gap: 14,
   },
   card: {
-    backgroundColor: 'white',
+    flex: 1,
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 16,
+    padding: 18,
     flexDirection: 'row',
     alignItems: 'center',
     elevation: 3,
   },
   cardPressed: {
-    transform: [{ scale: 0.98 }],
-    opacity: 0.95,
+    opacity: 0.92,
   },
   alertCard: {
-    borderLeftColor: '#C62828',
     borderLeftWidth: 4,
+    borderLeftColor: '#C62828',
   },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#2E7D32',
-  },
-  cardText: {
-    fontSize: 14,
-    marginTop: 4,
-    color: '#333',
-  },
-  cardSmall: {
-    fontSize: 12,
-    color: '#777',
-    marginTop: 2,
-  },
-
-  // QUICK ACTIONS
+  cardTitle: { fontSize: 16, fontWeight: '700', color: '#1B5E20' },
+  cardText: { fontSize: 14, marginTop: 4, color: '#333333' },
+  cardSmall: { fontSize: 12, marginTop: 2, color: '#777' },
   actionsGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 12,
-    marginTop: 10,
+    marginTop: 12,
   },
   actionButton: {
     flex: 1,
-    backgroundColor: 'white',
-    paddingVertical: 22,
-    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 24,
+    borderRadius: 16,
     alignItems: 'center',
     elevation: 3,
   },
-  actionLabel: {
-    marginTop: 8,
-    color: '#2E7D32',
-    fontWeight: '600',
+  actionLabel: { marginTop: 10, color: '#2E7D32', fontWeight: '600' },
+  communityBanner: {
+    marginTop: 28,
+    backgroundColor: '#2E7D32',
+    borderRadius: 18,
+    padding: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
-
-  // BOTTOM SECTION
+  communityTitle: { fontSize: 16, fontWeight: '700', color: '#FFFFFF' },
+  communitySubtitle: { color: '#E8F5E9', fontSize: 13 },
   bottomContainer: {
     position: 'absolute',
     bottom: 25,
@@ -302,67 +308,37 @@ const styles = StyleSheet.create({
   helpBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderRadius: 30,
+    borderRadius: 999,
     elevation: 5,
-    marginBottom: 10,
+    gap: 8,
   },
-  helpText: {
-    color: '#2E7D32',
-    fontWeight: '600',
-    marginLeft: 8,
-    fontSize: 15,
-  },
-  fab: {
-    backgroundColor: '#2E7D32',
-    width: 55,
-    height: 55,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 8,
-  },
-
-  // MODAL
+  helpText: { color: '#2E7D32', fontWeight: '600', fontSize: 15 },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
   modalCard: {
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    width: '100%',
     padding: 20,
-    borderRadius: 16,
-    width: '90%',
   },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#2E7D32',
-    marginBottom: 12,
-  },
+  modalTitle: { fontSize: 18, fontWeight: '700', color: '#2E7D32', marginBottom: 12 },
   communityRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
     alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
   },
-  communityText: {
-    fontSize: 16,
-    color: '#333',
-  },
-  modalCancel: {
-    marginTop: 14,
-    alignSelf: 'center',
-  },
-  cancelText: {
-    color: '#777',
-    fontSize: 15,
-  },
+  communityText: { fontSize: 16, color: '#333333' },
+  modalCancel: { marginTop: 16, alignSelf: 'center' },
+  cancelText: { color: '#777777', fontSize: 15 },
 });
