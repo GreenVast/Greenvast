@@ -249,7 +249,7 @@ PYTHON_SVC_URL=http://python-ai:8000 docker-compose up --build
 ---
 
 ## 10. License
-MIT License (or specify your own).
+
 
 ---
 
