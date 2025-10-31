@@ -142,11 +142,12 @@ export default function Market() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#E8F5E9', paddingTop: 40 },
+  screen: { flex: 1, backgroundColor: '#E8F5E9', paddingTop: 2 },
   header: {
     backgroundColor: '#2E7D32',
     paddingHorizontal: 20,
     paddingVertical: 16,
+    marginTop: 32,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

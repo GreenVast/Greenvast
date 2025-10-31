@@ -19,8 +19,8 @@ export default function UploadProduct() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#E8F5E9', padding: 20 }}>
-      <Text style={{ fontSize: 20, color: '#2E7D32', fontWeight: '700' }}>Upload Product</Text>
+    <View style={{ flex: 1, backgroundColor: '#E8F5E9', padding: 20, marginTop: 32 }}>
+      <Text style={{ fontSize: 20, color: '#2E7D32', fontWeight: '700', marginTop: 16 }}>Upload Product</Text>
       <TextInput placeholder="Product name" value={name} onChangeText={setName} style={{ backgroundColor: '#fff', padding: 12, borderRadius: 8, marginTop: 12 }} />
       <TextInput placeholder="Price (KES)" value={price} onChangeText={setPrice} keyboardType="numeric" style={{ backgroundColor: '#fff', padding: 12, borderRadius: 8, marginTop: 12 }} />
       <TextInput placeholder="Image URL (optional)" value={image} onChangeText={setImage} style={{ backgroundColor: '#fff', padding: 12, borderRadius: 8, marginTop: 12 }} />

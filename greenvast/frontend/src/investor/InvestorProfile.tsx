@@ -1,38 +1,26 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
   ScrollView,
   Platform,
+  TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/useAuthStore';
+import { useNavigation } from '@react-navigation/native';
 
 export default function InvestorProfile() {
-  const { user, logout, setUser } = useAuthStore();
+  const logout = useAuthStore((s) => s.logout);
+  const navigation = useNavigation<any>();
 
-  // Local form state
-  const [form, setForm] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    county: user?.county || '',
-    language: user?.language || 'English',
-    interest: user?.farmingType || '',
-  });
-
-  const handleSave = () => {
-    setUser({
-      ...user,
-      ...form,
-    } as any);
-    alert('Profile updated successfully!');
-  };
-
-  const handleLogout = () => {
-    logout();
-    alert('You have been logged out');
+  // Example static profile data
+  const profile = {
+    name: 'Investor',
+    email: 'investor@gmail.com',
+    county: 'Nairobi',
+    language: 'English',
+    interest: 'Dairy, Maize, Tomatoes',
   };
 
   return (
@@ -57,8 +45,6 @@ export default function InvestorProfile() {
         <Text style={{ color: 'white', fontSize: 24, fontWeight: '700' }}>
           Investor Profile
         </Text>
-
-        {/* Icon */}
         <View
           style={{
             backgroundColor: 'white',
@@ -81,96 +67,57 @@ export default function InvestorProfile() {
             marginBottom: 20,
           }}
         >
-          Welcome, {form.name || 'Investor'}
+          Welcome, {profile.name}
         </Text>
 
-        {/* Editable Fields */}
+        {/* Static Profile Details */}
         <View style={{ backgroundColor: 'white', borderRadius: 14, padding: 16, elevation: 2 }}>
           <Text style={{ fontWeight: '700', fontSize: 18, marginBottom: 10, color: '#2E7D32' }}>
             Profile Details
           </Text>
-
           <Text style={{ marginTop: 8 }}>Full Name</Text>
-          <TextInput
-            style={styles.input}
-            value={form.name}
-            onChangeText={(text) => setForm({ ...form, name: text })}
-            placeholder="Your name"
-          />
-
+          <Text style={styles.input}>{profile.name}</Text>
           <Text style={{ marginTop: 12 }}>Email</Text>
-          <TextInput
-            style={styles.input}
-            value={form.email}
-            onChangeText={(text) => setForm({ ...form, email: text })}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            editable={false}
-          />
-
+          <Text style={styles.input}>{profile.email}</Text>
           <Text style={{ marginTop: 12 }}>County</Text>
-          <TextInput
-            style={styles.input}
-            value={form.county}
-            onChangeText={(text) => setForm({ ...form, county: text })}
-            placeholder="e.g., Nairobi"
-          />
-
+          <Text style={styles.input}>{profile.county}</Text>
           <Text style={{ marginTop: 12 }}>Language</Text>
-          <TextInput
-            style={styles.input}
-            value={form.language}
-            onChangeText={(text) => setForm({ ...form, language: text })}
-            placeholder="English / Kiswahili"
-          />
-
+          <Text style={styles.input}>{profile.language}</Text>
           <Text style={{ marginTop: 12 }}>Farming Interest</Text>
-          <TextInput
-            style={styles.input}
-            value={form.interest}
-            onChangeText={(text) => setForm({ ...form, interest: text })}
-            placeholder="e.g., Dairy, Maize, Tomatoes"
-          />
+          <Text style={styles.input}>{profile.interest}</Text>
         </View>
 
-        {/* Buttons */}
+        {/* Investment History */}
+        <View style={{ backgroundColor: 'white', borderRadius: 14, padding: 16, elevation: 2, marginTop: 24 }}>
+          <Text style={{ fontWeight: '700', fontSize: 18, marginBottom: 10, color: '#2E7D32' }}>
+            Investment History
+          </Text>
+          <Text style={{ marginBottom: 8 }}>Farmer: Aisha Omar</Text>
+          <Text style={{ marginBottom: 8 }}>Amount: KES 50,000</Text>
+          <Text style={{ marginBottom: 8 }}>Date: 2025-03-15</Text>
+          <Text style={{ marginBottom: 8 }}>Status: Repaid</Text>
+          <View style={{ height: 1, backgroundColor: '#eee', marginVertical: 8 }} />
+          <Text style={{ marginBottom: 8 }}>Farmer: John Mwangi</Text>
+          <Text style={{ marginBottom: 8 }}>Amount: KES 30,000</Text>
+          <Text style={{ marginBottom: 8 }}>Date: 2025-07-10</Text>
+          <Text style={{ marginBottom: 8 }}>Status: Ongoing</Text>
+        </View>
+
+        {/* Logout Button */}
         <TouchableOpacity
-          onPress={handleSave}
+          onPress={() => {
+            logout();
+            navigation.navigate('Login');
+          }}
           style={{
-            backgroundColor: '#2E7D32',
+            backgroundColor: '#C62828',
             padding: 14,
             borderRadius: 12,
             alignItems: 'center',
             marginTop: 24,
           }}
         >
-          <Text style={{ color: 'white', fontSize: 16, fontWeight: '700' }}>💾 Save Changes</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => alert('Feature coming soon!')}
-          style={{
-            backgroundColor: '#1B5E20',
-            padding: 14,
-            borderRadius: 12,
-            alignItems: 'center',
-            marginTop: 12,
-          }}
-        >
-          <Text style={{ color: 'white', fontSize: 16, fontWeight: '700' }}>📊 View Investments</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={handleLogout}
-          style={{
-            backgroundColor: '#C62828',
-            padding: 14,
-            borderRadius: 12,
-            alignItems: 'center',
-            marginTop: 12,
-          }}
-        >
-          <Text style={{ color: 'white', fontSize: 16, fontWeight: '700' }}>🚪 Logout</Text>
+          <Text style={{ color: 'white', fontSize: 16, fontWeight: '700' }}>Logout</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

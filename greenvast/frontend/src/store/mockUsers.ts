@@ -18,10 +18,15 @@ interface MockUser {
 }
 
 const users: MockUser[] = [
-  // seeded users (no real personal names)
-  { email: 'farmer@gmail.com', password: '123', role: 'farmer', profile: { name: '', phone: '', county: '', language: 'en', farmingType: '', email: 'farmer@gmail.com' } },
-  { email: 'investor@gmail.com', password: '123', role: 'investor', profile: { name: 'Investor', email: 'investor@gmail.com' } },
-  { email: 'buyer@gmail.com', password: '123', role: 'buyer', profile: { name: 'Buyer', phone: '', county: '', email: 'buyer@gmail.com' } },
+  // Farmer owner and manager
+  { email: 'farmer@gmail.com', password: '123', role: 'farmer', profile: { name: 'Owner', phone: '', county: '', language: 'en', farmingType: '', email: 'farmer@gmail.com' } },
+  { email: 'farmer@gmail.com', password: '123', role: 'farmer', profile: { name: 'Manager', phone: '', county: '', language: 'en', farmingType: '', email: 'farmer@gmail.com' } },
+  // Investor owner and manager
+  { email: 'investor@gmail.com', password: '123', role: 'investor', profile: { name: 'Owner', email: 'investor@gmail.com' } },
+  { email: 'investor@gmail.com', password: '123', role: 'investor', profile: { name: 'Manager', email: 'investor@gmail.com' } },
+  // Buyer owner and manager
+  { email: 'buyer@gmail.com', password: '123', role: 'buyer', profile: { name: 'Owner', phone: '', county: '', email: 'buyer@gmail.com' } },
+  { email: 'buyer@gmail.com', password: '123', role: 'buyer', profile: { name: 'Manager', phone: '', county: '', email: 'buyer@gmail.com' } },
 ];
 
 export function findUser(email: string, password?: string) {

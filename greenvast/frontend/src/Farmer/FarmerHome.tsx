@@ -7,7 +7,6 @@ import {
   Linking,
   StyleSheet,
   Modal,
-  Alert,
   Pressable,
   Platform,
   SafeAreaView,
@@ -22,6 +21,12 @@ export default function FarmerHome() {
   const [joinModalVisible, setJoinModalVisible] = useState(false);
 
   const communities = ['Local Farmers', 'Crop Exchange', 'Dairy Group', 'Avocado Growers'];
+  const communityLinks = {
+    'Local Farmers': 'https://chat.whatsapp.com/EXAMPLE1',
+    'Crop Exchange': 'https://chat.whatsapp.com/EXAMPLE2',
+    'Dairy Group': 'https://chat.whatsapp.com/EXAMPLE3',
+    'Avocado Growers': 'https://chat.whatsapp.com/EXAMPLE4',
+  };
 
   const handleCallSupport = () => {
     Linking.openURL('tel:+254740682018');
@@ -161,7 +166,7 @@ export default function FarmerHome() {
                   style={styles.communityRow}
                   onPress={() => {
                     setJoinModalVisible(false);
-                    Alert.alert('Joined', `You joined ${c}`);
+                    Linking.openURL(communityLinks[c]);
                   }}
                 >
                   <Text style={styles.communityText}>{c}</Text>
